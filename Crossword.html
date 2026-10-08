@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TOEIC Crossword · 30 Words</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --felt:#1E362F;
+    --felt-dark:#152722;
+    --card:#F4EEDD;
+    --ink:#20261F;
+    --ink-soft:#5B5A4C;
+    --mustard:#C7902F;
+    --rust:#A6472B;
+    --green-ok:#4C7A5B;
+    --line:#D8CFB2;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--felt);
+    color:var(--card);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:28px 12px 56px;
+  }
+  .eyebrow{
+    font-family:'Space Mono',monospace;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:var(--mustard);
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(22px,4vw,32px);
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+    text-align:center;
+  }
+  .sub{
+    font-size:13px;
+    color:#B9C4BB;
+    margin-bottom:20px;
+    text-align:center;
+    max-width:520px;
+  }
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  button{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    border:none;
+    cursor:pointer;
+    border-radius:999px;
+    padding:9px 16px;
+    transition:transform 0.15s ease, opacity 0.15s ease;
+  }
+  button:active{transform:scale(0.94);}
+  .btn-primary{background:var(--mustard); color:#1E1608;}
+  .btn-ghost{background:rgba(244,238,221,0.1); color:var(--card); border:1px solid rgba(244,238,221,0.25);}
+  .btn-ghost:hover, .btn-primary:hover{opacity:0.88;}
+
+  .status-line{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    color:var(--mustard);
+    margin-bottom:14px;
+    min-height:16px;
+  }
+
+  .board-wrap{
+    width:100%;
+    max-width:900px;
+    overflow-x:auto;
+    background:var(--card);
+    border-radius:10px;
+    box-shadow:0 18px 40px -14px rgba(0,0,0,0.5);
+    padding:16px;
+    margin-bottom:26px;
+  }
+  #grid{
+    display:grid;
+    gap:2px;
+    width:max-content;
+    margin:0 auto;
+  }
+  .cell{
+    position:relative;
+    width:26px;
+    height:26px;
+    background:transparent;
+  }
+  .cell.filled{
+    background:#fff;
+    border:1px solid var(--line);
+  }
+  .cell input{
+    width:100%;
+    height:100%;
+    border:none;
+    background:transparent;
+    text-align:center;
+    text-transform:uppercase;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    color:var(--ink);
+    padding:0;
+  }
+  .cell input:focus{
+    outline:2px solid var(--mustard);
+    outline-offset:-2px;
+  }
+  .cell.correct input{background:#dcefdf; color:var(--green-ok);}
+  .cell.incorrect input{background:#fbdcd4; color:var(--rust);}
+  .cell-num{
+    position:absolute;
+    top:0px; left:1px;
+    font-family:'Space Mono',monospace;
+    font-size:7.5px;
+    color:var(--ink-soft);
+    pointer-events:none;
+    line-height:1;
+  }
+
+  .clues-wrap{
+    width:100%;
+    max-width:900px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  @media (max-width:600px){
+    .clues-wrap{grid-template-columns:1fr;}
+  }
+  .clue-col-title{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:16px;
+    color:var(--card);
+    margin-bottom:8px;
+    border-bottom:1px solid rgba(244,238,221,0.25);
+    padding-bottom:6px;
+  }
+  .clue-item{
+    font-size:12.5px;
+    color:#D9DFCF;
+    line-height:1.5;
+    margin-bottom:8px;
+    cursor:pointer;
+    padding:4px 6px;
+    border-radius:4px;
+    transition:background 0.15s ease;
+  }
+  .clue-item:hover, .clue-item.active{
+    background:rgba(199,144,47,0.18);
+  }
+  .clue-item b{
+    color:var(--mustard);
+    font-family:'Space Mono',monospace;
+    margin-right:4px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="eyebrow">Crossword · 18 Words</div>
+  <h1>Vocabulary Crossword</h1>
+  <div class="sub">Click a clue to jump to it, or click any square and start typing. 18 of the 30 flashcard words are hidden in this grid.</div>
+
+  <div class="toolbar">
+    <button class="btn-primary" id="checkBtn">Check answers</button>
+    <button class="btn-ghost" id="revealBtn">Reveal puzzle</button>
+    <button class="btn-ghost" id="clearBtn">Clear</button>
+  </div>
+  <div class="status-line" id="statusLine"></div>
+
+  <div class="board-wrap">
+    <div id="grid"></div>
+  </div>
+
+  <div class="clues-wrap">
+    <div>
+      <div class="clue-col-title">Across</div>
+      <div id="acrossList"></div>
+    </div>
+    <div>
+      <div class="clue-col-title">Down</div>
+      <div id="downList"></div>
+    </div>
+  </div>
+
+<script>
+const DATA = {"height":22,"width":17,"cells":[{"row":9,"col":2,"letter":"C"},{"row":9,"col":3,"letter":"R"},{"row":9,"col":4,"letter":"E"},{"row":9,"col":5,"letter":"D"},{"row":9,"col":6,"letter":"E"},{"row":9,"col":7,"letter":"N"},{"row":9,"col":8,"letter":"T"},{"row":9,"col":9,"letter":"I"},{"row":9,"col":10,"letter":"A"},{"row":9,"col":11,"letter":"L"},{"row":9,"col":12,"letter":"S"},{"row":10,"col":12,"letter":"U"},{"row":11,"col":12,"letter":"S"},{"row":12,"col":12,"letter":"P"},{"row":13,"col":12,"letter":"I"},{"row":14,"col":12,"letter":"C"},{"row":15,"col":12,"letter":"I"},{"row":16,"col":12,"letter":"O"},{"row":17,"col":12,"letter":"U"},{"row":18,"col":12,"letter":"S"},{"row":13,"col":7,"letter":"S"},{"row":13,"col":8,"letter":"C"},{"row":13,"col":9,"letter":"R"},{"row":13,"col":10,"letter":"U"},{"row":13,"col":11,"letter":"T"},{"row":13,"col":13,"letter":"N"},{"row":13,"col":14,"letter":"I"},{"row":13,"col":15,"letter":"Z"},{"row":13,"col":16,"letter":"E"},{"row":10,"col":3,"letter":"E"},{"row":11,"col":3,"letter":"N"},{"row":12,"col":3,"letter":"O"},{"row":13,"col":3,"letter":"V"},{"row":14,"col":3,"letter":"A"},{"row":15,"col":3,"letter":"T"},{"row":16,"col":3,"letter":"I"},{"row":17,"col":3,"letter":"O"},{"row":18,"col":3,"letter":"N"},{"row":11,"col":2,"letter":"I"},{"row":11,"col":4,"letter":"V"},{"row":11,"col":5,"letter":"E"},{"row":11,"col":6,"letter":"N"},{"row":11,"col":7,"letter":"T"},{"row":11,"col":8,"letter":"O"},{"row":11,"col":9,"letter":"R"},{"row":11,"col":10,"letter":"Y"},{"row":2,"col":8,"letter":"F"},{"row":3,"col":8,"letter":"O"},{"row":4,"col":8,"letter":"R"},{"row":5,"col":8,"letter":"E"},{"row":6,"col":8,"letter":"C"},{"row":7,"col":8,"letter":"A"},{"row":8,"col":8,"letter":"S"},{"row":15,"col":9,"letter":"D"},{"row":15,"col":10,"letter":"I"},{"row":15,"col":11,"letter":"V"},{"row":15,"col":13,"letter":"D"},{"row":15,"col":14,"letter":"E"},{"row":15,"col":15,"letter":"N"},{"row":15,"col":16,"letter":"D"},{"row":7,"col":7,"letter":"T"},{"row":7,"col":9,"letter":"K"},{"row":7,"col":10,"letter":"E"},{"row":7,"col":11,"letter":"O"},{"row":7,"col":12,"letter":"V"},{"row":7,"col":13,"letter":"E"},{"row":7,"col":14,"letter":"R"},{"row":3,"col":7,"letter":"D"},{"row":3,"col":9,"letter":"W"},{"row":3,"col":10,"letter":"N"},{"row":3,"col":11,"letter":"S"},{"row":3,"col":12,"letter":"I"},{"row":3,"col":13,"letter":"Z"},{"row":3,"col":14,"letter":"E"},{"row":5,"col":1,"letter":"M"},{"row":5,"col":2,"letter":"O"},{"row":5,"col":3,"letter":"R"},{"row":5,"col":4,"letter":"T"},{"row":5,"col":5,"letter":"G"},{"row":5,"col":6,"letter":"A"},{"row":5,"col":7,"letter":"G"},{"row":9,"col":14,"letter":"P"},{"row":10,"col":14,"letter":"R"},{"row":11,"col":14,"letter":"E"},{"row":12,"col":14,"letter":"M"},{"row":14,"col":14,"letter":"S"},{"row":16,"col":14,"letter":"S"},{"row":16,"col":1,"letter":"T"},{"row":16,"col":2,"letter":"R"},{"row":16,"col":4,"letter":"U"},{"row":16,"col":5,"letter":"M"},{"row":16,"col":6,"letter":"P"},{"row":16,"col":7,"letter":"H"},{"row":14,"col":0,"letter":"V"},{"row":14,"col":1,"letter":"A"},{"row":14,"col":2,"letter":"C"},{"row":14,"col":4,"letter":"N"},{"row":14,"col":5,"letter":"C"},{"row":14,"col":6,"letter":"Y"},{"row":16,"col":10,"letter":"T"},{"row":17,"col":10,"letter":"E"},{"row":18,"col":10,"letter":"M"},{"row":19,"col":10,"letter":"I"},{"row":20,"col":10,"letter":"Z"},{"row":21,"col":10,"letter":"E"},{"row":0,"col":4,"letter":"T"},{"row":1,"col":4,"letter":"E"},{"row":2,"col":4,"letter":"N"},{"row":3,"col":4,"letter":"A"},{"row":4,"col":4,"letter":"N"},{"row":2,"col":14,"letter":"M"},{"row":4,"col":14,"letter":"R"},{"row":5,"col":14,"letter":"G"},{"row":6,"col":14,"letter":"E"},{"row":19,"col":7,"letter":"A"},{"row":19,"col":8,"letter":"U"},{"row":19,"col":9,"letter":"D"},{"row":19,"col":11,"letter":"T"},{"row":17,"col":8,"letter":"S"},{"row":18,"col":8,"letter":"L"},{"row":20,"col":8,"letter":"M"},{"row":21,"col":8,"letter":"P"}],"across":[{"number":4,"word":"DOWNSIZE","clue":"To reduce a company's size, often by cutting jobs","row":3,"col":7,"len":8},{"number":5,"word":"MORTGAGE","clue":"A loan used to buy property, repaid over time","row":5,"col":1,"len":8},{"number":6,"word":"TAKEOVER","clue":"The act of gaining control of a company","row":7,"col":7,"len":8},{"number":7,"word":"CREDENTIALS","clue":"Qualifications that prove someone is suited for a role","row":9,"col":2,"len":11},{"number":11,"word":"INVENTORY","clue":"The stock of goods a business has on hand","row":11,"col":2,"len":9},{"number":12,"word":"SCRUTINIZE","clue":"To examine something very closely","row":13,"col":7,"len":10},{"number":13,"word":"VACANCY","clue":"An unfilled job or empty space","row":14,"col":0,"len":7},{"number":14,"word":"DIVIDEND","clue":"A payment made by a company to its shareholders","row":15,"col":9,"len":8},{"number":16,"word":"TRIUMPH","clue":"A great victory or success","row":16,"col":1,"len":7},{"number":18,"word":"AUDIT","clue":"An official examination of financial records","row":19,"col":7,"len":5}],"down":[{"number":1,"word":"TENANT","clue":"A person who rents property from a landlord","row":0,"col":4,"len":6},{"number":2,"word":"FORECAST","clue":"A prediction about the future","row":2,"col":8,"len":8},{"number":3,"word":"MERGER","clue":"The joining of two companies into one","row":2,"col":14,"len":6},{"number":8,"word":"RENOVATION","clue":"The process of repairing or improving a building","row":9,"col":3,"len":10},{"number":9,"word":"SUSPICIOUS","clue":"Feeling that something may be wrong or dishonest","row":9,"col":12,"len":10},{"number":10,"word":"PREMISES","clue":"A building and its land, especially for business","row":9,"col":14,"len":8},{"number":15,"word":"ITEMIZE","clue":"To list things individually, one by one","row":15,"col":10,"len":7},{"number":17,"word":"SLUMP","clue":"A sudden and significant decline","row":17,"col":8,"len":5}]};
+;
+
+const height = DATA.height;
+const width = DATA.width;
+
+// build lookup of filled cells -> correct letter
+const cellMap = {};
+DATA.cells.forEach(c => { cellMap[c.row + "_" + c.col] = c.letter; });
+
+// build number lookup (start cells) from across/down entries
+const numberMap = {};
+[...DATA.across, ...DATA.down].forEach(e => {
+  const key = e.row + "_" + e.col;
+  if(!(key in numberMap)) numberMap[key] = e.number;
+});
+
+// build cell -> entries (for click-to-jump / highlighting), each cell may belong to an across and/or down word
+const cellEntries = {}; // key -> {across: entry|null, down: entry|null}
+function registerEntry(e, dir){
+  for(let i=0;i<e.len;i++){
+    const r = e.row + (dir === 'V' ? i : 0);
+    const c = e.col + (dir === 'H' ? i : 0);
+    const key = r+"_"+c;
+    if(!cellEntries[key]) cellEntries[key] = {};
+    cellEntries[key][dir] = e;
+  }
+}
+DATA.across.forEach(e => registerEntry(e, 'H'));
+DATA.down.forEach(e => registerEntry(e, 'V'));
+
+const gridEl = document.getElementById('grid');
+gridEl.style.gridTemplateRows = `repeat(${height}, 26px)`;
+gridEl.style.gridTemplateColumns = `repeat(${width}, 26px)`;
+
+const inputs = {};
+
+for(let r=0; r<height; r++){
+  for(let c=0; c<width; c++){
+    const key = r+"_"+c;
+    const div = document.createElement('div');
+    if(key in cellMap){
+      div.className = 'cell filled';
+      const num = numberMap[key];
+      if(num){
+        const numEl = document.createElement('div');
+        numEl.className = 'cell-num';
+        numEl.textContent = num;
+        div.appendChild(numEl);
+      }
+      const input = document.createElement('input');
+      input.maxLength = 1;
+      input.dataset.row = r;
+      input.dataset.col = c;
+      input.addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g,'');
+        div.classList.remove('correct','incorrect');
+        if(e.target.value){
+          focusNext(r, c);
+        }
+      });
+      input.addEventListener('keydown', (e) => {
+        if(e.key === 'Backspace' && !e.target.value){
+          focusPrev(r, c);
+        } else if(e.key === 'ArrowRight'){ focusCell(r, c+1); }
+        else if(e.key === 'ArrowLeft'){ focusCell(r, c-1); }
+        else if(e.key === 'ArrowDown'){ focusCell(r+1, c); }
+        else if(e.key === 'ArrowUp'){ focusCell(r-1, c); }
+      });
+      div.appendChild(input);
+      inputs[key] = input;
+    } else {
+      div.className = 'cell';
+    }
+    gridEl.appendChild(div);
+  }
+}
+
+let lastDirection = 'H';
+
+function focusCell(r, c){
+  const key = r+"_"+c;
+  if(inputs[key]) inputs[key].focus();
+}
+function focusNext(r, c){
+  if(lastDirection === 'H') focusCell(r, c+1);
+  else focusCell(r, c-1 >= 0 ? r : r, c); // fallback
+  // simpler: try same direction as active word
+  const key = r+"_"+c;
+  const entries = cellEntries[key] || {};
+  if(entries.H && lastDirection === 'H'){
+    focusCell(r, c+1);
+  } else if(entries.V && lastDirection === 'V'){
+    focusCell(r+1, c);
+  } else if(entries.H){
+    focusCell(r, c+1);
+  } else if(entries.V){
+    focusCell(r+1, c);
+  }
+}
+function focusPrev(r, c){
+  const key = r+"_"+c;
+  const entries = cellEntries[key] || {};
+  if(entries.H && lastDirection === 'H'){
+    focusCell(r, c-1);
+  } else if(entries.V && lastDirection === 'V'){
+    focusCell(r-1, c);
+  } else if(entries.H){
+    focusCell(r, c-1);
+  } else if(entries.V){
+    focusCell(r-1, c);
+  }
+}
+
+// track direction on focus based on which word list item was clicked, or default guess
+Object.values(inputs).forEach(inp=>{
+  inp.addEventListener('focus', ()=>{
+    const key = inp.dataset.row+"_"+inp.dataset.col;
+    const entries = cellEntries[key] || {};
+    if(entries.H && !entries.V) lastDirection = 'H';
+    else if(entries.V && !entries.H) lastDirection = 'V';
+  });
+});
+
+function renderClues(){
+  const acrossList = document.getElementById('acrossList');
+  const downList = document.getElementById('downList');
+  DATA.across.forEach(e=>{
+    const div = document.createElement('div');
+    div.className = 'clue-item';
+    div.innerHTML = `<b>${e.number}.</b>${e.clue}`;
+    div.addEventListener('click', ()=>{
+      lastDirection = 'H';
+      focusCell(e.row, e.col);
+    });
+    acrossList.appendChild(div);
+  });
+  DATA.down.forEach(e=>{
+    const div = document.createElement('div');
+    div.className = 'clue-item';
+    div.innerHTML = `<b>${e.number}.</b>${e.clue}`;
+    div.addEventListener('click', ()=>{
+      lastDirection = 'V';
+      focusCell(e.row, e.col);
+    });
+    downList.appendChild(div);
+  });
+}
+renderClues();
+
+document.getElementById('checkBtn').addEventListener('click', ()=>{
+  let filled = 0, correct = 0, total = Object.keys(cellMap).length;
+  Object.entries(inputs).forEach(([key, input])=>{
+    const div = input.parentElement;
+    div.classList.remove('correct','incorrect');
+    if(input.value){
+      filled++;
+      if(input.value === cellMap[key]){
+        div.classList.add('correct');
+        correct++;
+      } else {
+        div.classList.add('incorrect');
+      }
+    }
+  });
+  const statusLine = document.getElementById('statusLine');
+  if(correct === total){
+    statusLine.textContent = `All ${total} letters correct! Puzzle solved.`;
+  } else {
+    statusLine.textContent = `${correct} / ${filled} filled letters correct (${total} total in the grid).`;
+  }
+});
+
+document.getElementById('revealBtn').addEventListener('click', ()=>{
+  Object.entries(inputs).forEach(([key, input])=>{
+    input.value = cellMap[key];
+    const div = input.parentElement;
+    div.classList.remove('incorrect');
+    div.classList.add('correct');
+  });
+  document.getElementById('statusLine').textContent = 'Puzzle revealed.';
+});
+
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  Object.values(inputs).forEach(input=>{
+    input.value = '';
+    input.parentElement.classList.remove('correct','incorrect');
+  });
+  document.getElementById('statusLine').textContent = 'Grid cleared.';
+});
+</script>
+</body>
+</html>
